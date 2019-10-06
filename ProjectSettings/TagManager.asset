@@ -12,6 +12,7 @@ TagManager:
   - OtherSnake
   - Snake
   - Tile
+  - Taken
   layers:
   - Default
   - TransparentFX

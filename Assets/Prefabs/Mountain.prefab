@@ -10,6 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3368165887301835922}
   - component: {fileID: 7240193791269517057}
+  - component: {fileID: 4606780815741470865}
+  - component: {fileID: 2402420808774244612}
+  - component: {fileID: 2195317792055901256}
   m_Layer: 0
   m_Name: Mountain
   m_TagString: Mountain
@@ -80,6 +83,80 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!50 &4606780815741470865
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6618269515950506905}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!60 &2402420808774244612
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6618269515950506905}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.24, y: 0.16}
+    newSize: {x: 0.24, y: 0.16}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: -0.023092046, y: 0.0652368}
+      - {x: -0.026940718, y: -0.017348818}
+      - {x: -0.100315765, y: -0.0119869}
+      - {x: -0.10277629, y: -0.06523682}
+      - {x: 0.100315765, y: -0.072618395}
+      - {x: 0.097855195, y: -0.014447417}
+      - {x: 0.028170958, y: -0.018579084}
+      - {x: 0.020631492, y: 0.065236844}
+--- !u!114 &2195317792055901256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6618269515950506905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4579fb9ce1cdff649866d29ba5dd7c7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
+  pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
+  blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
+  lightblue: {fileID: 21300000, guid: 3d0085781bc366a419c30e5435f0cd71, type: 3}
+  green: {fileID: 21300000, guid: 5032f3bb5e535aa4ab8458fa842589e0, type: 3}
+  yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
+  alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
+  tile: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
 --- !u!1 &7240427083062654735
 GameObject:
   m_ObjectHideFlags: 0

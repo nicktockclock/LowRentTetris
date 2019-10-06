@@ -13,6 +13,7 @@ public class Setup : MonoBehaviour
     public float top;
     public float stepsize;
     public GameObject tile;
+    public GameObject[,] tiles;
     public GameObject[] pieces;
     public GameObject playerpiece;
     public int score;
@@ -22,15 +23,17 @@ public class Setup : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        tiles = new GameObject[xsize, ysize];
         stepsize = tile.GetComponent<SpriteRenderer>().bounds.size.x;
         leftwall = 1 - stepsize / 2;
         rightwall = leftwall + (stepsize * xsize);
         bottom = -3 - stepsize / 2;
         top = bottom + (stepsize * ysize);
         BuildGrid();
-        ProofOfConcept();
+        //ProofOfConcept();
         playerpiece = Instantiate(pieces[5], new Vector3(leftwall + pieces[5].GetComponent<SpriteRenderer>().bounds.extents.x + stepsize * 4, top - pieces[5].GetComponent<SpriteRenderer>().bounds.extents.y), Quaternion.identity);
-        InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
+        //  InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
+        playerpiece.transform.SetParent(board.transform);
     }
 
     private void OnGUI()
@@ -43,18 +46,23 @@ public class Setup : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (playerpiece.transform.position.y - (stepsize * 2) <= bottom)
+        {
+
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.position.x-(stepsize*2) >= leftwall)
         {
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.position.x+(stepsize*2) <= rightwall)
         {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y - stepsize, 0);
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
         }
-        if (Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.position.y - (stepsize * 2) >= bottom)
         {
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
         }
+        HitBottomOrCollide();
 
     }
 
@@ -67,6 +75,7 @@ public class Setup : MonoBehaviour
             for (int j = 0; j < ysize; j++)
             {
                 GameObject newtile = Instantiate(tile, new Vector3(x, y, 0f), Quaternion.identity);
+                tiles[i, j] = newtile;
                 newtile.transform.SetParent(board.transform);
                 y += tile.GetComponent<SpriteRenderer>().bounds.size.y;
             }
@@ -75,7 +84,44 @@ public class Setup : MonoBehaviour
         }
     }
 
-    void ProofOfConcept()
+    void CheckLines()
+    {
+        for (int i = 0; i < ysize; i++)
+        {
+            bool check = false;
+            for (int j = 0; j < xsize; j++)
+            {
+                if (tiles[j, i].CompareTag("Taken"))
+                {
+                    check = true;
+                }
+                else
+                {
+                    check = false;
+                    break;
+                }
+            }
+            if (check == true)
+            {
+                ClearLine(i);
+            }
+        }
+    }
+
+    void ClearLine(int y)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            tiles[i, y].tag = "Tile";
+        }
+    }
+
+    void HitBottomOrCollide()
+    {
+
+    }
+
+  /*  void ProofOfConcept()
     {
         GameObject current1 = Instantiate(pieces[1], new Vector3(leftwall + pieces[1].GetComponent<SpriteRenderer>().bounds.extents.x, bottom + pieces[1].GetComponent<SpriteRenderer>().bounds.extents.y, 0), Quaternion.identity);
         GameObject current2 = Instantiate(pieces[0], new Vector3(leftwall + pieces[0].GetComponent<SpriteRenderer>().bounds.extents.x, bottom + pieces[0].GetComponent<SpriteRenderer>().bounds.extents.y + stepsize * 4, 0), Quaternion.identity);
@@ -86,10 +132,16 @@ public class Setup : MonoBehaviour
         GameObject next2 = Instantiate(pieces[4], new Vector3(leftwall - stepsize*3, bottom + stepsize*6, 0), Quaternion.identity);
         GameObject next3 = Instantiate(pieces[3], new Vector3(leftwall - stepsize*3, bottom + stepsize*10, 0), Quaternion.identity);
 
-    }
+    }*/
 
     void MovePlayerPiece()
     {
         playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        Debug.Log("HERE");
     }
 }

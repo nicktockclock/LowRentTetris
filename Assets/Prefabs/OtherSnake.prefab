@@ -89,6 +89,9 @@ GameObject:
   m_Component:
   - component: {fileID: 652689132870543739}
   - component: {fileID: 659639748217642750}
+  - component: {fileID: 1208317382223203195}
+  - component: {fileID: 1476556892141029179}
+  - component: {fileID: 8759664737905776823}
   m_Layer: 0
   m_Name: OtherSnake
   m_TagString: OtherSnake
@@ -104,7 +107,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8377641985085439048}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.039, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 4}
   m_Children:
   - {fileID: 2007261723223228823}
@@ -159,3 +162,77 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!50 &1208317382223203195
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8377641985085439048}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!60 &1476556892141029179
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8377641985085439048}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.16, y: 0.24}
+    newSize: {x: 0.16, y: 0.24}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.01198687, y: 0.1052368}
+      - {x: 0.014934342, y: 0.029447313}
+      - {x: -0.0627763, y: 0.028013095}
+      - {x: -0.070157886, y: -0.112618424}
+      - {x: -0.009526346, y: -0.09785524}
+      - {x: -0.0013093352, y: -0.028124906}
+      - {x: 0.06277629, y: -0.025552582}
+      - {x: 0.070157886, y: 0.1052368}
+--- !u!114 &8759664737905776823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8377641985085439048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4579fb9ce1cdff649866d29ba5dd7c7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
+  pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
+  blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
+  lightblue: {fileID: 21300000, guid: 3d0085781bc366a419c30e5435f0cd71, type: 3}
+  green: {fileID: 21300000, guid: 5032f3bb5e535aa4ab8458fa842589e0, type: 3}
+  yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
+  alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
+  tile: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
