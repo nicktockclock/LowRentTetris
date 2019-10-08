@@ -12,17 +12,31 @@ public class Setup : MonoBehaviour
     public float bottom;
     public float top;
     public float stepsize;
+    public float currentheight;
+    public float currentwidth;
     public GameObject tile;
-    public GameObject[,] tiles;
+    public static GameObject[,] tiles;
     public GameObject[] pieces;
     public GameObject playerpiece;
     public int score;
     private GUIStyle guiStyle = new GUIStyle();
     public GameObject board;
     public GameObject activepieces;
+    public static bool hit = false;
+    public static ArrayList currenttiles;
+    public Sprite red;
+    public Sprite pink;
+    public Sprite blue;
+    public Sprite lightblue;
+    public Sprite green;
+    public Sprite yellow;
+    public Sprite alsored;
+    public Sprite tilesprite;
+    public bool canmove = false;
     // Start is called before the first frame update
     void Start()
     {
+        currenttiles = new ArrayList();
         tiles = new GameObject[xsize, ysize];
         stepsize = tile.GetComponent<SpriteRenderer>().bounds.size.x;
         leftwall = 1 - stepsize / 2;
@@ -30,9 +44,8 @@ public class Setup : MonoBehaviour
         bottom = -3 - stepsize / 2;
         top = bottom + (stepsize * ysize);
         BuildGrid();
-        //ProofOfConcept();
-        playerpiece = Instantiate(pieces[5], new Vector3(leftwall + pieces[5].GetComponent<SpriteRenderer>().bounds.extents.x + stepsize * 4, top - pieces[5].GetComponent<SpriteRenderer>().bounds.extents.y), Quaternion.identity);
-        //  InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
+        CreatePlayerPiece();
+        InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
         playerpiece.transform.SetParent(board.transform);
     }
 
@@ -43,49 +56,100 @@ public class Setup : MonoBehaviour
         GUI.Label(new Rect(120, 150, 100, 20), "Score: 0", guiStyle);
     }
 
+    void CreatePlayerPiece()
+    {
+        int num = Random.Range(0, 6);
+        playerpiece = Instantiate(pieces[num], new Vector3(leftwall + stepsize * 4, top - stepsize), Quaternion.identity);
+        currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
+        currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
+        playerpiece.transform.SetParent(board.transform);
+    }
+
+
     // Update is called once per frame
     void Update()
     {
-        if (playerpiece.transform.position.y - (stepsize * 2) <= bottom)
+        if (!hit)
         {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - stepsize >= leftwall + 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + stepsize <= rightwall - 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 >= bottom + 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.Space) && playerpiece.tag != "Box")
+            {
+                currenttiles.Clear();
+                playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
 
+                if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
+                }
+            }
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.position.x-(stepsize*2) >= leftwall)
+        Debug.Log(currenttiles.Count);
+        if (CheckHit())
         {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+            HitBottomOrCollide();
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.position.x+(stepsize*2) <= rightwall)
-        {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.position.y - (stepsize * 2) >= bottom)
-        {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
-        }
-        HitBottomOrCollide();
+    }
 
+    bool CheckHit()
+    {
+        foreach (GameObject g in currenttiles)
+        {
+            if (g.GetComponent<Position>().y-1<0 || tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y - 1].CompareTag("Taken"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void BuildGrid()
     {
         float x = 1;
         float y = -3;
-        for (int i = 0; i < xsize; i++)
+        for (int i = 0; i < ysize; i++)
         {
-            for (int j = 0; j < ysize; j++)
+            for (int j = 0; j < xsize; j++)
             {
                 GameObject newtile = Instantiate(tile, new Vector3(x, y, 0f), Quaternion.identity);
-                tiles[i, j] = newtile;
+                newtile.GetComponent<Position>().x = j;
+                newtile.GetComponent<Position>().y = i;
+                newtile.GetComponent<Position>().current = false;
+                tiles[j, i] = newtile;
                 newtile.transform.SetParent(board.transform);
-                y += tile.GetComponent<SpriteRenderer>().bounds.size.y;
+                x += tile.GetComponent<SpriteRenderer>().bounds.size.x;
             }
-            x += tile.GetComponent<SpriteRenderer>().bounds.size.x;
-            y = -3;
+
+            y += tile.GetComponent<SpriteRenderer>().bounds.size.y;
+            x = 1;
         }
     }
 
     void CheckLines()
     {
+        int num = 0;
+        int topcleared = 0;
         for (int i = 0; i < ysize; i++)
         {
             bool check = false;
@@ -103,8 +167,15 @@ public class Setup : MonoBehaviour
             }
             if (check == true)
             {
+                topcleared = i;
+                num += 1;
                 ClearLine(i);
+                Debug.Log("HERE");
             }
+        }
+        if (num > 0)
+        {
+            DropLines(num, topcleared+1);
         }
     }
 
@@ -113,12 +184,70 @@ public class Setup : MonoBehaviour
         for (int i = 0; i < 10; i++)
         {
             tiles[i, y].tag = "Tile";
+            tiles[i, y].GetComponent<SpriteRenderer>().sprite = tilesprite;
         }
     }
 
-    void HitBottomOrCollide()
+    void DropLines(int num, int topcleared)
     {
+        for (int i = topcleared; i < ysize; i++)
+        {
+            for (int j = 0; j < xsize; j++)
+            {
+                if (tiles[j, i].CompareTag("Taken"))
+                {
+                    tiles[j, i - num].tag = "Taken";
+                    tiles[j, i - num].GetComponent<SpriteRenderer>().sprite = tiles[j, i].GetComponent<SpriteRenderer>().sprite;
+                    tiles[j, i].tag = "Tile";
+                    tiles[j, i].GetComponent<SpriteRenderer>().sprite = tilesprite;
+                }
+            }
+        }
+    }
 
+    public void HitBottomOrCollide()
+    {
+        hit = true;
+        foreach (GameObject g in currenttiles)
+        {
+            Debug.Log("Here1");
+            tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].tag = "Taken";
+            if (playerpiece.CompareTag("OtherSnake"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = red;
+            }
+            else if (playerpiece.CompareTag("Mountain"))
+            {
+                Debug.Log("Here2");
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = pink;
+            }
+            else if (playerpiece.CompareTag("Snake"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = blue;
+            }
+            else if (playerpiece.CompareTag("Box"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = lightblue;
+            }
+            else if (playerpiece.CompareTag("Lshape"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = green;
+            }
+            else if (playerpiece.CompareTag("OtherLShape"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = yellow;
+            }
+            else if (playerpiece.CompareTag("Long"))
+            {
+                tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = alsored;
+            }
+
+        }
+        currenttiles.Clear();
+        Destroy(playerpiece);
+        CheckLines();
+        CreatePlayerPiece();
+        hit = false;
     }
 
   /*  void ProofOfConcept()
@@ -136,12 +265,11 @@ public class Setup : MonoBehaviour
 
     void MovePlayerPiece()
     {
-        playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        gameObject.GetComponent<SpriteRenderer>().color = Color.red;
-        Debug.Log("HERE");
+        currenttiles.Clear();
+        if (playerpiece.transform.GetChild(0).position.y - stepsize >= bottom+0.2)
+        {
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+        }
+        
     }
 }

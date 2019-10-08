@@ -12,10 +12,28 @@ public class Collision : MonoBehaviour
     public Sprite yellow;
     public Sprite alsored;
     public Sprite tile;
-
+    //every movement feed back the tiles occupied. on update check if below this tile is the bottom or a taken tile
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Setup.currenttiles.Add(collision.gameObject);
+        //collision.gameObject.tag = "Occupied";
+        /* if (collision.gameObject.CompareTag("Taken"))
+         {
+             Debug.Log("HHHH");
+             Setup.hit = true;
+             return;
+         }
+         else
+         {
+             collision.gameObject.tag = "Taken";
+         }
+         if (Setup.hit == true)
+         {
+             return;
+         }
+        collision.gameObject.tag = "Taken";
+      //  collision.gameObject.GetComponent<Position>().current = true;
         if (gameObject.CompareTag("OtherSnake"))
         {
             collision.gameObject.GetComponent<SpriteRenderer>().sprite = red;
@@ -44,11 +62,25 @@ public class Collision : MonoBehaviour
         {
             collision.gameObject.GetComponent<SpriteRenderer>().sprite = alsored;
         }
+      /*  if (collision.gameObject.GetComponent<Position>().y - 1 >=0 && Setup.tiles[collision.gameObject.GetComponent<Position>().x, collision.gameObject.GetComponent<Position>().y- 1].CompareTag("Taken"))
+        {
+            Setup.hit = true;
+            Debug.Log("Here");
+        }*/
     }
 
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        collision.gameObject.GetComponent<SpriteRenderer>().sprite = tile;
+       /* if (collision.gameObject.CompareTag("Occupied"))
+        {
+            Setup.currenttiles.Add(collision.gameObject);
+        }
+        else
+        {
+            collision.gameObject.tag = "Tile";
+        }*/
     }
+
+
 }

@@ -410,19 +410,29 @@ MonoBehaviour:
   bottom: 0
   top: 0
   stepsize: 0
+  currentheight: 0
+  currentwidth: 0
   tile: {fileID: 7794200906992192623, guid: 3d9399b55c3a4fe4b8d9fadc96a3d242, type: 3}
   pieces:
-  - {fileID: 8474450922182163574, guid: 9ca90258584837b4fade4b9a21d5bf73, type: 3}
-  - {fileID: 466456134854619957, guid: 3f1fb4d92569c304f9eacee764af5f46, type: 3}
-  - {fileID: 1582809339354013085, guid: 44a0dac8608be5640841ddb2135c3c95, type: 3}
-  - {fileID: 6618269515950506905, guid: 287024be94359414f87983917ad18994, type: 3}
-  - {fileID: 4549679376453957247, guid: 0e2fdc77391fdc64893a5fdb045645ec, type: 3}
-  - {fileID: 8377641985085439048, guid: d64d5e9202cefb24d96f0bc911998e9d, type: 3}
-  - {fileID: 6385759938684194621, guid: 9bb204a774b87094ba371388c9303044, type: 3}
+  - {fileID: 8722279304181499353, guid: cba2359aa3eb92443bf9dc9bd2b19d1f, type: 3}
+  - {fileID: 1742701731806048090, guid: b72e1423f050c3b4487e9e648e39422c, type: 3}
+  - {fileID: 2338860482431040857, guid: 36232500e198d5f4ca124dcb1e433473, type: 3}
+  - {fileID: 4561698402986989160, guid: bc07d634e5ffa204a8cb6bde4a83377a, type: 3}
+  - {fileID: 6723184598921368958, guid: 621f13d95a2995f4abde43b9518f39b1, type: 3}
+  - {fileID: 4212966017338116833, guid: 249bc02464e1bd64d877bc8c8d226c14, type: 3}
+  - {fileID: 492879720273930521, guid: 2bdc61099f454a04ca80ad099f4de02e, type: 3}
   playerpiece: {fileID: 0}
   score: 0
   board: {fileID: 554501222}
   activepieces: {fileID: 1498128528}
+  red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
+  pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
+  blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
+  lightblue: {fileID: 21300000, guid: 3d0085781bc366a419c30e5435f0cd71, type: 3}
+  green: {fileID: 21300000, guid: 5032f3bb5e535aa4ab8458fa842589e0, type: 3}
+  yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
+  alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
+  tilesprite: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
