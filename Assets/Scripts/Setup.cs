@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Setup : MonoBehaviour
 {
     public const int xsize = 10;
     public const int ysize = 24;
-    private const float moveWait = 1.0f;
+    private float moveWait = 1.0f;
     public float leftwall;
     public float rightwall;
     public float bottom;
@@ -18,7 +19,9 @@ public class Setup : MonoBehaviour
     public static GameObject[,] tiles;
     public GameObject[] pieces;
     public GameObject playerpiece;
-    public int score;
+    public GameObject next1;
+    public GameObject next2;
+    public GameObject next3;
     private GUIStyle guiStyle = new GUIStyle();
     public GameObject board;
     public GameObject activepieces;
@@ -33,9 +36,14 @@ public class Setup : MonoBehaviour
     public Sprite alsored;
     public Sprite tilesprite;
     public bool canmove = false;
+    private float longbuffer = 0;
+    private int score;
+    private int linescleared;
     // Start is called before the first frame update
     void Start()
     {
+        score = 0;
+        linescleared = 0;
         currenttiles = new ArrayList();
         tiles = new GameObject[xsize, ysize];
         stepsize = tile.GetComponent<SpriteRenderer>().bounds.size.x;
@@ -44,30 +52,62 @@ public class Setup : MonoBehaviour
         bottom = -3 - stepsize / 2;
         top = bottom + (stepsize * ysize);
         BuildGrid();
-        CreatePlayerPiece();
+        StartGame();
         InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
-        playerpiece.transform.SetParent(board.transform);
     }
 
     private void OnGUI()
     {
         guiStyle.fontSize = 20;
-        GUI.Label(new Rect(120, 370, 100, 20), "Next", guiStyle);
-        GUI.Label(new Rect(120, 150, 100, 20), "Score: 0", guiStyle);
+        GUI.Label(new Rect(120, 280, 100, 20), "Next", guiStyle);
+        GUI.Label(new Rect(120, 150, 100, 20), "Score: " + score, guiStyle);
     }
 
-    void CreatePlayerPiece()
+    void StartGame()
     {
         int num = Random.Range(0, 6);
         playerpiece = Instantiate(pieces[num], new Vector3(leftwall + stepsize * 4, top - stepsize), Quaternion.identity);
         currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
+        num = Random.Range(0, 6);
+        next1 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0), Quaternion.identity);
+        next1.transform.SetParent(board.transform);
+        num = Random.Range(0, 6);
+        next2 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0), Quaternion.identity);
+        next2.transform.SetParent(board.transform);
+        num = Random.Range(0, 6);
+        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
+        next3.transform.SetParent(board.transform);
     }
 
+    void UpdateScore(int multiplier)
+    {
+        score += 100 * (multiplier*2);
+    }
 
-    // Update is called once per frame
-    void Update()
+    void CreatePlayerPiece()
+    {
+        longbuffer = 0;
+        int num = Random.Range(0, 6);
+        next1.transform.position = new Vector3(leftwall + stepsize * 4, top - stepsize, 0.0f);
+        next2.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0.0f);
+        next3.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0.0f);
+        playerpiece = next1;
+        next1 = next2;
+        next2 = next3;
+        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
+        currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
+        currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
+        playerpiece.transform.SetParent(board.transform);
+        Debug.Log(currenttiles.Count);
+        if (CheckHit())
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
+
+    void MainLoop()
     {
         if (!hit)
         {
@@ -86,7 +126,25 @@ public class Setup : MonoBehaviour
                 currenttiles.Clear();
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.Space) && playerpiece.tag != "Box")
+            else if (Input.GetKeyDown(KeyCode.A) && playerpiece.tag != "Box")
+            {
+                currenttiles.Clear();
+                playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+
+                if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.S) && playerpiece.tag != "Box")
             {
                 currenttiles.Clear();
                 playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
@@ -105,10 +163,98 @@ public class Setup : MonoBehaviour
                 }
             }
         }
-        Debug.Log(currenttiles.Count);
         if (CheckHit())
         {
             HitBottomOrCollide();
+        }
+    }
+
+    void MainLoopLong()
+    {
+        if (!hit)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - longbuffer >= leftwall + 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer<= rightwall - 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 + longbuffer >= bottom + 0.20)
+            {
+                currenttiles.Clear();
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                currenttiles.Clear();
+                playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+                if (longbuffer == 0)
+                {
+                    longbuffer = stepsize * 2;
+                }
+                else
+                {
+                    longbuffer = 0;
+                }
+                if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize*2, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize*2, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                currenttiles.Clear();
+                playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
+                if (longbuffer == 0)
+                {
+                    longbuffer = stepsize * 2;
+                }
+                else
+                {
+                    longbuffer = 0;
+                }
+                if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize * 2, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize * 2, playerpiece.transform.position.y, 0);
+                }
+                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+                {
+                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
+                }
+            }
+        }
+        if (CheckHit())
+        {
+            HitBottomOrCollide();
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (playerpiece.CompareTag("Long"))
+        {
+            MainLoopLong();
+        }
+        else
+        {
+            MainLoop();
         }
     }
 
@@ -169,13 +315,20 @@ public class Setup : MonoBehaviour
             {
                 topcleared = i;
                 num += 1;
+                linescleared += 1;
                 ClearLine(i);
-                Debug.Log("HERE");
+                if (linescleared > 1)
+                {
+                    moveWait -= 0.1f;
+                    CancelInvoke("MovePlayerPiece");
+                    InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
+                }
             }
         }
         if (num > 0)
         {
             DropLines(num, topcleared+1);
+            UpdateScore(num);
         }
     }
 
@@ -210,7 +363,6 @@ public class Setup : MonoBehaviour
         hit = true;
         foreach (GameObject g in currenttiles)
         {
-            Debug.Log("Here1");
             tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].tag = "Taken";
             if (playerpiece.CompareTag("OtherSnake"))
             {
@@ -218,7 +370,6 @@ public class Setup : MonoBehaviour
             }
             else if (playerpiece.CompareTag("Mountain"))
             {
-                Debug.Log("Here2");
                 tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].GetComponent<SpriteRenderer>().sprite = pink;
             }
             else if (playerpiece.CompareTag("Snake"))
@@ -250,23 +401,16 @@ public class Setup : MonoBehaviour
         hit = false;
     }
 
-  /*  void ProofOfConcept()
-    {
-        GameObject current1 = Instantiate(pieces[1], new Vector3(leftwall + pieces[1].GetComponent<SpriteRenderer>().bounds.extents.x, bottom + pieces[1].GetComponent<SpriteRenderer>().bounds.extents.y, 0), Quaternion.identity);
-        GameObject current2 = Instantiate(pieces[0], new Vector3(leftwall + pieces[0].GetComponent<SpriteRenderer>().bounds.extents.x, bottom + pieces[0].GetComponent<SpriteRenderer>().bounds.extents.y + stepsize * 4, 0), Quaternion.identity);
-        GameObject current3 = Instantiate(pieces[3], new Vector3(leftwall + pieces[3].GetComponent<SpriteRenderer>().bounds.extents.x + stepsize * 3, bottom + pieces[3].GetComponent<SpriteRenderer>().bounds.extents.y, 0), Quaternion.identity);
-        GameObject current4 = Instantiate(pieces[6], new Vector3(leftwall + pieces[6].GetComponent<SpriteRenderer>().bounds.extents.x + stepsize * 5, bottom + pieces[6].GetComponent<SpriteRenderer>().bounds.extents.y, 0), Quaternion.identity);
-        GameObject current5 = Instantiate(pieces[2], new Vector3(leftwall + pieces[2].GetComponent<SpriteRenderer>().bounds.extents.x + stepsize * 6, bottom + pieces[2].GetComponent<SpriteRenderer>().bounds.extents.y, 0), Quaternion.identity);
-        GameObject next1 = Instantiate(pieces[5], new Vector3(leftwall - stepsize*3, bottom + stepsize*2, 0), Quaternion.identity);
-        GameObject next2 = Instantiate(pieces[4], new Vector3(leftwall - stepsize*3, bottom + stepsize*6, 0), Quaternion.identity);
-        GameObject next3 = Instantiate(pieces[3], new Vector3(leftwall - stepsize*3, bottom + stepsize*10, 0), Quaternion.identity);
 
-    }*/
 
     void MovePlayerPiece()
     {
         currenttiles.Clear();
-        if (playerpiece.transform.GetChild(0).position.y - stepsize >= bottom+0.2)
+        if (!playerpiece.CompareTag("Long") && playerpiece.transform.GetChild(0).position.y - stepsize >= bottom+0.2)
+        {
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+        }
+        else if (playerpiece.transform.GetChild(0).position.y - stepsize + longbuffer >= bottom + 0.2)
         {
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
         }
