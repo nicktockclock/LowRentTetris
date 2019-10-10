@@ -36,9 +36,11 @@ public class Setup : MonoBehaviour
     public Sprite alsored;
     public Sprite tilesprite;
     public bool canmove = false;
+    public bool gameover = false;
     private float longbuffer = 0;
     private int score;
     private int linescleared;
+    public UnityEngine.UI.Text finalscore;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,25 +60,42 @@ public class Setup : MonoBehaviour
 
     private void OnGUI()
     {
-        guiStyle.fontSize = 20;
-        GUI.Label(new Rect(120, 280, 100, 20), "Next", guiStyle);
-        GUI.Label(new Rect(120, 150, 100, 20), "Score: " + score, guiStyle);
+        if (!gameover)
+        {
+            guiStyle.fontSize = 20;
+            GUI.Label(new Rect(120, 280, 100, 20), "Next", guiStyle);
+            GUI.Label(new Rect(120, 150, 100, 20), "Score: " + score, guiStyle);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void GoBack()
+    {
+        SceneManager.LoadScene(0);
     }
 
     void StartGame()
     {
-        int num = Random.Range(0, 6);
+        int num = Random.Range(0, 7);
         playerpiece = Instantiate(pieces[num], new Vector3(leftwall + stepsize * 4, top - stepsize), Quaternion.identity);
         currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
-        num = Random.Range(0, 6);
+        num = Random.Range(0, 7);
         next1 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0), Quaternion.identity);
         next1.transform.SetParent(board.transform);
-        num = Random.Range(0, 6);
+        num = Random.Range(0, 7);
         next2 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0), Quaternion.identity);
         next2.transform.SetParent(board.transform);
-        num = Random.Range(0, 6);
+        num = Random.Range(0, 7);
         next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
         next3.transform.SetParent(board.transform);
     }
@@ -89,7 +108,7 @@ public class Setup : MonoBehaviour
     void CreatePlayerPiece()
     {
         longbuffer = 0;
-        int num = Random.Range(0, 6);
+        int num = Random.Range(0, 7);
         next1.transform.position = new Vector3(leftwall + stepsize * 4, top - stepsize, 0.0f);
         next2.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0.0f);
         next3.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0.0f);
@@ -100,67 +119,59 @@ public class Setup : MonoBehaviour
         currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
-        Debug.Log(currenttiles.Count);
-        if (CheckHit())
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
     }
 
     void MainLoop()
     {
-        if (!hit)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - stepsize >= leftwall + 0.20)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - stepsize >= leftwall + 0.20)
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + stepsize <= rightwall - 0.20)
+        {
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 >= bottom + 0.20)
+        {
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.A) && playerpiece.tag != "Box")
+        {
+            currenttiles.Clear();
+            playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+
+            if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
             {
-                currenttiles.Clear();
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + stepsize <= rightwall - 0.20)
+            if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
             {
-                currenttiles.Clear();
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 >= bottom + 0.20)
+            if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
             {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.A) && playerpiece.tag != "Box")
-            {
-                currenttiles.Clear();
-                playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+        }
+        else if (Input.GetKeyDown(KeyCode.S) && playerpiece.tag != "Box")
+        {
+            currenttiles.Clear();
+            playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
 
-                if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
-                }
+            if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.S) && playerpiece.tag != "Box")
+            if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
             {
-                currenttiles.Clear();
-                playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
-
-                if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.x - currentwidth <= leftwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
-                }
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+            }
+            if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
         if (CheckHit())
@@ -171,72 +182,69 @@ public class Setup : MonoBehaviour
 
     void MainLoopLong()
     {
-        if (!hit)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - longbuffer >= leftwall + 0.20)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - longbuffer >= leftwall + 0.20)
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer<= rightwall - 0.20)
+        {
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 + longbuffer >= bottom + 0.20)
+        {
+            currenttiles.Clear();
+            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            currenttiles.Clear();
+            playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+            if (longbuffer == 0)
             {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
+                longbuffer = stepsize * 2;
             }
-            else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer<= rightwall - 0.20)
+            else
             {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
+                longbuffer = 0;
             }
-            else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 + longbuffer >= bottom + 0.20)
+            if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
             {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize*2, playerpiece.transform.position.y, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.A))
+            if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
             {
-                currenttiles.Clear();
-                playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
-                if (longbuffer == 0)
-                {
-                    longbuffer = stepsize * 2;
-                }
-                else
-                {
-                    longbuffer = 0;
-                }
-                if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize*2, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize*2, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
-                }
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize*2, playerpiece.transform.position.y, 0);
             }
-            else if (Input.GetKeyDown(KeyCode.S))
+            if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
             {
-                currenttiles.Clear();
-                playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
-                if (longbuffer == 0)
-                {
-                    longbuffer = stepsize * 2;
-                }
-                else
-                {
-                    longbuffer = 0;
-                }
-                if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize * 2, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize * 2, playerpiece.transform.position.y, 0);
-                }
-                if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
-                {
-                    playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
-                }
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            currenttiles.Clear();
+            playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
+            if (longbuffer == 0)
+            {
+                longbuffer = stepsize * 2;
+            }
+            else
+            {
+                longbuffer = 0;
+            }
+            if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize * 2, playerpiece.transform.position.y, 0);
+            }
+            if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize * 2, playerpiece.transform.position.y, 0);
+            }
+            if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
         if (CheckHit())
@@ -248,13 +256,15 @@ public class Setup : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playerpiece.CompareTag("Long"))
-        {
-            MainLoopLong();
-        }
-        else
-        {
-            MainLoop();
+        if (!hit && !gameover){
+            if (playerpiece.CompareTag("Long"))
+            {
+                MainLoopLong();
+            }
+            else
+            {
+                MainLoop();
+            }
         }
     }
 
@@ -295,7 +305,7 @@ public class Setup : MonoBehaviour
     void CheckLines()
     {
         int num = 0;
-        int topcleared = 0;
+        ArrayList topcleared = new ArrayList();
         for (int i = 0; i < ysize; i++)
         {
             bool check = false;
@@ -313,11 +323,11 @@ public class Setup : MonoBehaviour
             }
             if (check == true)
             {
-                topcleared = i;
+                topcleared.Add(i);
                 num += 1;
                 linescleared += 1;
                 ClearLine(i);
-                if (linescleared > 1)
+                if (linescleared > 1 && moveWait >= 0.3f)
                 {
                     moveWait -= 0.1f;
                     CancelInvoke("MovePlayerPiece");
@@ -327,10 +337,11 @@ public class Setup : MonoBehaviour
         }
         if (num > 0)
         {
-            DropLines(num, topcleared+1);
+            DropLines(num, topcleared);
             UpdateScore(num);
         }
     }
+
 
     void ClearLine(int y)
     {
@@ -341,18 +352,22 @@ public class Setup : MonoBehaviour
         }
     }
 
-    void DropLines(int num, int topcleared)
+    void DropLines(int num, ArrayList topcleared)
     {
-        for (int i = topcleared; i < ysize; i++)
+
+        foreach (int g in topcleared)
         {
-            for (int j = 0; j < xsize; j++)
+            for (int i = g; i < ysize; i++)
             {
-                if (tiles[j, i].CompareTag("Taken"))
+                for (int j = 0; j < xsize; j++)
                 {
-                    tiles[j, i - num].tag = "Taken";
-                    tiles[j, i - num].GetComponent<SpriteRenderer>().sprite = tiles[j, i].GetComponent<SpriteRenderer>().sprite;
-                    tiles[j, i].tag = "Tile";
-                    tiles[j, i].GetComponent<SpriteRenderer>().sprite = tilesprite;
+                    if (tiles[j, i].CompareTag("Taken"))
+                    {
+                        tiles[j, i - 1].tag = "Taken";
+                        tiles[j, i - 1].GetComponent<SpriteRenderer>().sprite = tiles[j, i].GetComponent<SpriteRenderer>().sprite;
+                        tiles[j, i].tag = "Tile";
+                        tiles[j, i].GetComponent<SpriteRenderer>().sprite = tilesprite;
+                    }
                 }
             }
         }
@@ -399,21 +414,36 @@ public class Setup : MonoBehaviour
         CheckLines();
         CreatePlayerPiece();
         hit = false;
+        for (int i = 0; i < xsize; i++)
+        {
+            if (tiles[i, ysize - 1].CompareTag("Taken")){
+                gameover = true;
+                CancelInvoke("MovePlayerPiece");
+                Destroy(board);
+                Destroy(next1);
+                Destroy(next2);
+                Destroy(next3);
+                OnGUI();
+                finalscore.text = "Final Score: " + score;
+            }
+        }
     }
 
 
 
     void MovePlayerPiece()
     {
-        currenttiles.Clear();
-        if (!playerpiece.CompareTag("Long") && playerpiece.transform.GetChild(0).position.y - stepsize >= bottom+0.2)
+        if (!hit)
         {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+            currenttiles.Clear();
+            if (!playerpiece.CompareTag("Long") && playerpiece.transform.GetChild(0).position.y - stepsize >= bottom + 0.2)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+            }
+            else if (playerpiece.transform.GetChild(0).position.y - stepsize + longbuffer >= bottom + 0.2)
+            {
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
+            }
         }
-        else if (playerpiece.transform.GetChild(0).position.y - stepsize + longbuffer >= bottom + 0.2)
-        {
-            playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
-        }
-        
     }
 }
