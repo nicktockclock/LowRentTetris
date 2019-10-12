@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Setup : MonoBehaviour
+public class InnovatedGame : MonoBehaviour
 {
     public const int xsize = 10;
     public const int ysize = 24;
@@ -16,6 +16,7 @@ public class Setup : MonoBehaviour
     public float currentheight;
     public float currentwidth;
     public GameObject tile;
+    public Sprite  obstacle;
     public static GameObject[,] tiles;
     public GameObject[] pieces;
     public GameObject playerpiece;
@@ -24,7 +25,7 @@ public class Setup : MonoBehaviour
     public GameObject next3;
     private GUIStyle guiStyle = new GUIStyle();
     public GameObject board;
-    public GameObject activepieces;
+    public GameObject map;
     public static bool hit = false;
     public static ArrayList currenttiles;
     public Sprite red;
@@ -43,6 +44,10 @@ public class Setup : MonoBehaviour
     public UnityEngine.UI.Text finalscore;
     public AudioSource clearsound;
     public AudioSource rotatesound;
+    private bool rotated = false;
+    private float angle = 0f;
+    private Rect blackout;
+    private bool blackedout;
     private int direction = 0;
     // Start is called before the first frame update
     void Start()
@@ -52,13 +57,14 @@ public class Setup : MonoBehaviour
         currenttiles = new ArrayList();
         tiles = new GameObject[xsize, ysize];
         stepsize = tile.GetComponent<SpriteRenderer>().bounds.size.x;
-        leftwall = 1 - stepsize / 2;
+        leftwall = 4 - stepsize / 2;
         rightwall = leftwall + (stepsize * xsize);
         bottom = -3 - stepsize / 2;
         top = bottom + (stepsize * ysize);
         BuildGrid();
         StartGame();
         InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
+        RotateCamera();
     }
 
     private void OnGUI()
@@ -66,8 +72,8 @@ public class Setup : MonoBehaviour
         if (!gameover)
         {
             guiStyle.fontSize = 20;
-            GUI.Label(new Rect(120, 280, 100, 20), "Next", guiStyle);
-            GUI.Label(new Rect(120, 150, 100, 20), "Score: " + score, guiStyle);
+            GUI.Label(new Rect(30, 280, 100, 20), "Next", guiStyle);
+            GUI.Label(new Rect(30, 150, 100, 20), "Score: " + score, guiStyle);
         }
         else
         {
@@ -101,11 +107,14 @@ public class Setup : MonoBehaviour
         num = Random.Range(0, 7);
         next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
         next3.transform.SetParent(board.transform);
+        float changenum = Random.Range(10.0f, 20.0f);
+        Invoke("ChangePiece", changenum);
+        Invoke("BlackOutNext", 1.0f);
     }
 
     void UpdateScore(int multiplier)
     {
-        score += 100 * (multiplier*2);
+        score += 100 * (multiplier * 2);
     }
 
     void CreatePlayerPiece()
@@ -122,6 +131,11 @@ public class Setup : MonoBehaviour
         currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
+        if (playerpiece.activeSelf == false)
+        {
+            playerpiece.SetActive(true);
+            next3.SetActive(false);
+        }
     }
 
     void MainLoop()
@@ -208,7 +222,7 @@ public class Setup : MonoBehaviour
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
             direction = 1;
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer<= rightwall - 0.20)
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer <= rightwall - 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
@@ -234,11 +248,11 @@ public class Setup : MonoBehaviour
             }
             if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
             {
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize*2, playerpiece.transform.position.y, 0);
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize * 2, playerpiece.transform.position.y, 0);
             }
             if (playerpiece.transform.GetChild(0).position.x - currentwidth - longbuffer <= leftwall)
             {
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize*2, playerpiece.transform.position.y, 0);
+                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize * 2, playerpiece.transform.position.y, 0);
             }
             if (playerpiece.transform.GetChild(0).position.y - currentheight <= bottom)
             {
@@ -293,7 +307,9 @@ public class Setup : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!hit && !gameover){
+        Camera.main.transform.RotateAround(new Vector3(3, 1, 0), new Vector3(0, 0, angle), 10.0f * Time.deltaTime);
+        if (!hit && !gameover)
+        {
             if (playerpiece.CompareTag("Long"))
             {
                 MainLoopLong();
@@ -309,7 +325,7 @@ public class Setup : MonoBehaviour
     {
         foreach (GameObject g in currenttiles)
         {
-            if (g.GetComponent<Position>().y-1<0 || tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y - 1].CompareTag("Taken"))
+            if (g.GetComponent<Position>().y - 1 < 0 || tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y - 1].CompareTag("Taken"))
             {
                 return true;
             }
@@ -331,7 +347,7 @@ public class Setup : MonoBehaviour
 
     void BuildGrid()
     {
-        float x = 1;
+        float x = 4;
         float y = -3;
         for (int i = 0; i < ysize; i++)
         {
@@ -347,7 +363,7 @@ public class Setup : MonoBehaviour
             }
 
             y += tile.GetComponent<SpriteRenderer>().bounds.size.y;
-            x = 1;
+            x = 4;
         }
     }
 
@@ -466,7 +482,8 @@ public class Setup : MonoBehaviour
         hit = false;
         for (int i = 0; i < xsize; i++)
         {
-            if (tiles[i, ysize - 1].CompareTag("Taken")){
+            if (tiles[i, ysize - 1].CompareTag("Taken"))
+            {
                 gameover = true;
                 CancelInvoke("MovePlayerPiece");
                 Destroy(board);
@@ -496,4 +513,42 @@ public class Setup : MonoBehaviour
             }
         }
     }
+
+    void RotateCamera()
+    {
+        angle = Random.Range(-45.0f, 45.0f);
+        float num = Random.Range(10.0f, 20.0f);
+        Invoke("RotateCamera", num);
+    }
+
+    void ChangePiece()
+    {
+        int num = Random.Range(0, 7);
+        Vector3 currentpos = playerpiece.gameObject.transform.position;
+        Destroy(playerpiece);
+        playerpiece = Instantiate(pieces[num], currentpos, Quaternion.identity);
+        float changenum = Random.Range(10.0f, 20.0f);
+        Invoke("ChangePiece", changenum);
+    }
+
+    void BlackOutNext()
+    {
+        if (blackedout)
+        {
+            next1.SetActive(true);
+            next2.SetActive(true);
+            next3.SetActive(true);
+            blackedout = false;
+        }
+        else
+        {
+            next1.SetActive(false);
+            next2.SetActive(false);
+            next3.SetActive(false);
+            blackedout = true;
+        }
+        float repeatrate = Random.Range(10.0f, 20.0f);
+        Invoke("BlackOutNext", repeatrate);
+    }
+
 }

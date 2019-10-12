@@ -91,10 +91,10 @@ GameObject:
   - component: {fileID: 659639748217642750}
   - component: {fileID: 1208317382223203195}
   - component: {fileID: 1476556892141029179}
-  - component: {fileID: 8759664737905776823}
   - component: {fileID: 6489691308903239334}
   - component: {fileID: 4965895765674972075}
   - component: {fileID: 3409846160902002168}
+  - component: {fileID: 3801488170245526737}
   m_Layer: 0
   m_Name: OtherSnake
   m_TagString: OtherSnake
@@ -219,26 +219,6 @@ PolygonCollider2D:
       - {x: 0.010803131, y: 0.06150727}
       - {x: 0.06519877, y: 0.064079575}
       - {x: 0.070157886, y: 0.1052368}
---- !u!114 &8759664737905776823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8377641985085439048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4579fb9ce1cdff649866d29ba5dd7c7d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
-  pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
-  blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
-  lightblue: {fileID: 21300000, guid: 3d0085781bc366a419c30e5435f0cd71, type: 3}
-  green: {fileID: 21300000, guid: 5032f3bb5e535aa4ab8458fa842589e0, type: 3}
-  yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
-  alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
-  tile: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
 --- !u!60 &6489691308903239334
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -332,3 +312,15 @@ PolygonCollider2D:
       - {x: -0.011492383, y: -0.10788754}
       - {x: -0.01932212, y: -0.057577495}
       - {x: -0.021744624, y: -0.061686806}
+--- !u!114 &3801488170245526737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8377641985085439048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c9e25404b270c34bb0b70da66aa8a5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -15,6 +15,7 @@ TagManager:
   - Taken
   - Floor
   - Occupied
+  - Obstacle
   layers:
   - Default
   - TransparentFX

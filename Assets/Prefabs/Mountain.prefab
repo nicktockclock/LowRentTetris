@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 7240193791269517057}
   - component: {fileID: 4606780815741470865}
   - component: {fileID: 2402420808774244612}
-  - component: {fileID: 2195317792055901256}
   - component: {fileID: 3609565107471440364}
   - component: {fileID: 3238088374559244023}
   - component: {fileID: 8258044210906937277}
+  - component: {fileID: 5320858318298206703}
   m_Layer: 0
   m_Name: Mountain
   m_TagString: Mountain
@@ -140,26 +140,6 @@ PolygonCollider2D:
       - {x: -0.052085713, y: -0.016865805}
       - {x: -0.04921791, y: -0.01616067}
       - {x: -0.05192057, y: -0.019407205}
---- !u!114 &2195317792055901256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6618269515950506905}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4579fb9ce1cdff649866d29ba5dd7c7d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
-  pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
-  blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
-  lightblue: {fileID: 21300000, guid: 3d0085781bc366a419c30e5435f0cd71, type: 3}
-  green: {fileID: 21300000, guid: 5032f3bb5e535aa4ab8458fa842589e0, type: 3}
-  yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
-  alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
-  tile: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
 --- !u!60 &3609565107471440364
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -253,6 +233,18 @@ PolygonCollider2D:
       - {x: 0.040192753, y: -0.063071184}
       - {x: 0.028100729, y: -0.018694412}
       - {x: 0.026142385, y: -0.02399125}
+--- !u!114 &5320858318298206703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6618269515950506905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c9e25404b270c34bb0b70da66aa8a5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7240427083062654735
 GameObject:
   m_ObjectHideFlags: 0
