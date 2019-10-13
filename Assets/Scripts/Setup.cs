@@ -5,16 +5,21 @@ using UnityEngine.SceneManagement;
 
 public class Setup : MonoBehaviour
 {
+    //Size of the grid
     public const int xsize = 10;
     public const int ysize = 24;
+    //Initial movement speed
     private float moveWait = 1.0f;
+    //Bounds of the grid
     public float leftwall;
     public float rightwall;
     public float bottom;
     public float top;
     public float stepsize;
+    //Height and width of playerpiece
     public float currentheight;
     public float currentwidth;
+    //Variables to hold tiles on the grid, pieces in the game, current playerpiece and next pieces
     public GameObject tile;
     public static GameObject[,] tiles;
     public GameObject[] pieces;
@@ -23,10 +28,13 @@ public class Setup : MonoBehaviour
     public GameObject next2;
     public GameObject next3;
     private GUIStyle guiStyle = new GUIStyle();
+    //Parent object for tiles and pieces
     public GameObject board;
-    public GameObject activepieces;
+    //Flag if a taken tile has been hit
     public static bool hit = false;
+    //Tiles currently occupied by playerpiece
     public static ArrayList currenttiles;
+    //Sprites used for the grid
     public Sprite red;
     public Sprite pink;
     public Sprite blue;
@@ -35,16 +43,26 @@ public class Setup : MonoBehaviour
     public Sprite yellow;
     public Sprite alsored;
     public Sprite tilesprite;
+    //Animation when clearing a row
+    public GameObject clearanim;
+    //Flags for if the piece can move, or if it is game over
     public bool canmove = false;
     public bool gameover = false;
+    //Buffer for the long player piece
     private float longbuffer = 0;
+    //Current score
     private int score;
+    //Number of lines cleared
     private int linescleared;
     public UnityEngine.UI.Text finalscore;
+    //Sounds used
     public AudioSource clearsound;
     public AudioSource rotatesound;
-    private int direction = 0;
-    // Start is called before the first frame update
+    public AudioSource changesound;
+    //For blacking out the next pieces
+    private bool blackedout;
+    private float angle = 0f;
+    // Start is called before the first frame update. Sets up the grid and calculated the bounds
     void Start()
     {
         score = 0;
@@ -61,6 +79,7 @@ public class Setup : MonoBehaviour
         InvokeRepeating("MovePlayerPiece", moveWait, moveWait);
     }
 
+    //Displays Next and the current score
     private void OnGUI()
     {
         if (!gameover)
@@ -75,16 +94,19 @@ public class Setup : MonoBehaviour
         }
     }
 
+    //Restart the level on button press
     public void Restart()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    //Go back to the title screen on button press
     public void GoBack()
     {
         SceneManager.LoadScene(0);
     }
 
+    //This method creates the first player piece and the next pieces coming in the correct position
     void StartGame()
     {
         int num = Random.Range(0, 7);
@@ -93,62 +115,80 @@ public class Setup : MonoBehaviour
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
         num = Random.Range(0, 7);
-        next1 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0), Quaternion.identity);
+        next1 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
         next1.transform.SetParent(board.transform);
         num = Random.Range(0, 7);
         next2 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0), Quaternion.identity);
         next2.transform.SetParent(board.transform);
         num = Random.Range(0, 7);
-        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
+        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0), Quaternion.identity);
         next3.transform.SetParent(board.transform);
+        //If this is the innovated level run extra methods
+        if (board.CompareTag("Innovation"))
+        {
+            float changenum = Random.Range(10.0f, 20.0f);
+            Invoke("ChangePiece", changenum);
+            Invoke("BlackOutNext", 1.0f);
+            RotateCamera();
+        }
     }
 
+    //Update the score based on the number of lines cleared
     void UpdateScore(int multiplier)
     {
         score += 100 * (multiplier*2);
     }
 
+    //When the current piece hits a taken tile or the bottom move to the next piece
     void CreatePlayerPiece()
     {
         longbuffer = 0;
         int num = Random.Range(0, 7);
         next1.transform.position = new Vector3(leftwall + stepsize * 4, top - stepsize, 0.0f);
-        next2.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0.0f);
+        next2.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0.0f);
         next3.transform.position = new Vector3(leftwall - stepsize * 3, bottom + stepsize * 6, 0.0f);
         playerpiece = next1;
         next1 = next2;
         next2 = next3;
-        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 10, 0), Quaternion.identity);
+        next3 = Instantiate(pieces[num], new Vector3(leftwall - stepsize * 3, bottom + stepsize * 2, 0), Quaternion.identity);
         currentheight = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.y;
         currentwidth = playerpiece.GetComponentInChildren<SpriteRenderer>().bounds.extents.x;
         playerpiece.transform.SetParent(board.transform);
+        //If the is the innovated level the next pieces may have been set as inactive. If so set the playerpiece to active and the newly created next3 to inactive
+        if (playerpiece.activeSelf == false)
+        {
+            playerpiece.SetActive(true);
+            next3.SetActive(false);
+        }
     }
 
+
+    //Main player loop for every peice but Long
     void MainLoop()
     {
+        //Check for player input and move the piece in the designated direction, checking it won't move outside of the grid
         if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - stepsize >= leftwall + 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-            direction = 1;
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + stepsize <= rightwall - 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-            direction = 2;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 >= bottom + 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
         }
+        //Rotate the piece left if A is pressed, making sure that the new rotation won't make the piece outside of the grid
         else if (Input.GetKeyDown(KeyCode.A) && playerpiece.tag != "Box")
         {
             rotatesound.Play();
             currenttiles.Clear();
             playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
-
+            //If the rotaion has made the piece outside the grid, push it back in
             if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
             {
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
@@ -162,12 +202,13 @@ public class Setup : MonoBehaviour
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
+        //Rotate the piece right if S is pressed, making sure that the new rotation won't make the piece outside of the grid
         else if (Input.GetKeyDown(KeyCode.S) && playerpiece.tag != "Box")
         {
             rotatesound.Play();
             currenttiles.Clear();
             playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
-
+            //If the rotaion has made the piece outside the grid, push it back in
             if (playerpiece.transform.GetChild(0).position.x + currentwidth >= rightwall)
             {
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
@@ -181,49 +222,39 @@ public class Setup : MonoBehaviour
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
-        if (CheckLeftAndRight())
-        {
-            if (direction == 1)
-            {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-            }
-            else if (direction == 2)
-            {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-            }
-        }
-        else if (CheckHit())
+        //Check is the piece has collided with the bottom if the grid or a taken tile
+        if (CheckHit())
         {
             HitBottomOrCollide();
         }
     }
 
+    //Main loop for the long piece
     void MainLoopLong()
     {
+        //Check for player input and move the piece in the designated direction, checking it won't move outside of the grid
         if (Input.GetKeyDown(KeyCode.LeftArrow) && playerpiece.transform.GetChild(0).position.x - longbuffer >= leftwall + 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-            direction = 1;
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow) && playerpiece.transform.GetChild(0).position.x + longbuffer<= rightwall - 0.20)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-            direction = 2;
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 + longbuffer >= bottom + 0.20)
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && playerpiece.transform.GetChild(0).position.y - stepsize * 2 + longbuffer >= bottom + 0.40)
         {
             currenttiles.Clear();
             playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
         }
+        //Rotate the piece left if A is pressed, making sure that the new rotation won't make the piece outside of the grid
         else if (Input.GetKeyDown(KeyCode.A))
         {
             rotatesound.Play();
             currenttiles.Clear();
             playerpiece.transform.Rotate(new Vector3(0, 0, -90), Space.Self);
+            //Update the space buffer when the long piece is rotated
             if (longbuffer == 0)
             {
                 longbuffer = stepsize * 2;
@@ -232,6 +263,7 @@ public class Setup : MonoBehaviour
             {
                 longbuffer = 0;
             }
+            //If the rotaion has made the piece outside the grid, push it back in
             if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
             {
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize*2, playerpiece.transform.position.y, 0);
@@ -245,11 +277,13 @@ public class Setup : MonoBehaviour
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
+        //Rotate the piece right if S is pressed, making sure that the new rotation won't make the piece outside of the grid
         else if (Input.GetKeyDown(KeyCode.S))
         {
             rotatesound.Play();
             currenttiles.Clear();
             playerpiece.transform.Rotate(new Vector3(0, 0, 90), Space.Self);
+            //Update the space buffer when the long piece is rotated
             if (longbuffer == 0)
             {
                 longbuffer = stepsize * 2;
@@ -258,6 +292,7 @@ public class Setup : MonoBehaviour
             {
                 longbuffer = 0;
             }
+            //If the rotaion has made the piece outside the grid, push it back in
             if (playerpiece.transform.GetChild(0).position.x + currentwidth + longbuffer >= rightwall)
             {
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize * 2, playerpiece.transform.position.y, 0);
@@ -271,20 +306,8 @@ public class Setup : MonoBehaviour
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y + stepsize, 0);
             }
         }
-        if (CheckLeftAndRight())
-        {
-            if (direction == 1)
-            {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x + stepsize, playerpiece.transform.position.y, 0);
-            }
-            else if (direction == 2)
-            {
-                currenttiles.Clear();
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x - stepsize, playerpiece.transform.position.y, 0);
-            }
-        }
-        else if (CheckHit())
+        //Check is the piece has collided with the bottom if the grid or a taken tile
+        if (CheckHit())
         {
             HitBottomOrCollide();
         }
@@ -293,6 +316,9 @@ public class Setup : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Rotate camera based on angle in the Innovated level
+        Camera.main.transform.RotateAround(new Vector3(3, 1, 0), new Vector3(0, 0, angle), 10.0f * Time.deltaTime);
+        //Run main loop if a piece has not collided and it's not game over
         if (!hit && !gameover){
             if (playerpiece.CompareTag("Long"))
             {
@@ -305,6 +331,8 @@ public class Setup : MonoBehaviour
         }
     }
 
+    //Using the current position of the playerpiece on the grid, check if it has collided with the bottom of the grid
+    //or a tile that has already been taken
     bool CheckHit()
     {
         foreach (GameObject g in currenttiles)
@@ -317,18 +345,7 @@ public class Setup : MonoBehaviour
         return false;
     }
 
-    bool CheckLeftAndRight()
-    {
-        foreach (GameObject g in currenttiles)
-        {
-            if (tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].CompareTag("Taken") || tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].CompareTag("Obstacle"))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    //Build the game grid with tiles and save them in the tiles array
     void BuildGrid()
     {
         float x = 1;
@@ -351,9 +368,12 @@ public class Setup : MonoBehaviour
         }
     }
 
+    //Checks if a row has been filled by running through the grid and checking if a row is full of tiles that are marked Taken
     void CheckLines()
     {
+        //Number of lines that are filled
         int num = 0;
+        //Array for the y position of the lines that are full
         ArrayList topcleared = new ArrayList();
         for (int i = 0; i < ysize; i++)
         {
@@ -370,12 +390,16 @@ public class Setup : MonoBehaviour
                     break;
                 }
             }
+            //If a row is filled clear the line
             if (check == true)
             {
+                GameObject c = Instantiate(clearanim, new Vector3(leftwall+stepsize*5, bottom + stepsize * i + (stepsize/2), 0), Quaternion.identity);
+                Destroy(c, 0.5f);
                 topcleared.Add(i);
                 num += 1;
                 linescleared += 1;
                 ClearLine(i);
+                //Speed up as lines are cleared
                 if (linescleared > 1 && moveWait >= 0.3f)
                 {
                     moveWait -= 0.1f;
@@ -384,6 +408,7 @@ public class Setup : MonoBehaviour
                 }
             }
         }
+        //If lines were cleared drop the other blocks down if needed and update the score
         if (num > 0)
         {
             DropLines(num, topcleared);
@@ -391,7 +416,7 @@ public class Setup : MonoBehaviour
         }
     }
 
-
+    //Clear a line by running through it and updating the sprite back to the normal tile sprite and update the tag
     void ClearLine(int y)
     {
         clearsound.Play();
@@ -402,6 +427,7 @@ public class Setup : MonoBehaviour
         }
     }
 
+    //For every line that has been cleared, go from that line up and drop the taken tiles above it down
     void DropLines(int num, ArrayList topcleared)
     {
 
@@ -423,9 +449,12 @@ public class Setup : MonoBehaviour
         }
     }
 
+    //If the player piece has hit an already taken tile of the bottom of the grid
     public void HitBottomOrCollide()
     {
         hit = true;
+        //Go through the occupied tiles and update the colour of the tile to that same as the playerpiece
+        //Update the tag of the tile to Taken
         foreach (GameObject g in currenttiles)
         {
             tiles[g.GetComponent<Position>().x, g.GetComponent<Position>().y].tag = "Taken";
@@ -459,11 +488,15 @@ public class Setup : MonoBehaviour
             }
 
         }
+        //Destroy the player piece, clear the currenttiles
         currenttiles.Clear();
         Destroy(playerpiece);
+        //Check if lines have been filled
         CheckLines();
+        //Move on to the next piece
         CreatePlayerPiece();
         hit = false;
+        //Check if the newly created piece has hit the top of the grid, and if so game over
         for (int i = 0; i < xsize; i++)
         {
             if (tiles[i, ysize - 1].CompareTag("Taken")){
@@ -480,20 +513,57 @@ public class Setup : MonoBehaviour
     }
 
 
-
+    //Moves the plaayer piece down once
     void MovePlayerPiece()
     {
         if (!hit)
         {
             currenttiles.Clear();
-            if (!playerpiece.CompareTag("Long") && playerpiece.transform.GetChild(0).position.y - stepsize >= bottom + 0.2)
-            {
-                playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
-            }
-            else if (playerpiece.transform.GetChild(0).position.y - stepsize + longbuffer >= bottom + 0.2)
+            if (playerpiece.transform.GetChild(0).position.y - stepsize >= bottom + 0.2)
             {
                 playerpiece.transform.position = new Vector3(playerpiece.transform.position.x, playerpiece.transform.position.y - stepsize, 0);
             }
         }
+    }
+
+    //In the innovated level change the current player piece to a different piece at random intervals
+    void ChangePiece()
+    {
+        changesound.Play();
+        int num = Random.Range(0, 7);
+        Vector3 currentpos = playerpiece.gameObject.transform.position;
+        Destroy(playerpiece);
+        playerpiece = Instantiate(pieces[num], currentpos, Quaternion.identity);
+        float changenum = Random.Range(10.0f, 20.0f);
+        Invoke("ChangePiece", changenum);
+    }
+
+    //In the innovated level black out the next pieces at random intervals
+    void BlackOutNext()
+    {
+        if (blackedout)
+        {
+            next1.SetActive(true);
+            next2.SetActive(true);
+            next3.SetActive(true);
+            blackedout = false;
+        }
+        else
+        {
+            next1.SetActive(false);
+            next2.SetActive(false);
+            next3.SetActive(false);
+            blackedout = true;
+        }
+        float repeatrate = Random.Range(10.0f, 20.0f);
+        Invoke("BlackOutNext", repeatrate);
+    }
+
+    //In the innovated level change the angle the camera rotates at random intervals
+    void RotateCamera()
+    {
+        angle = Random.Range(-45.0f, 45.0f);
+        float num = Random.Range(10.0f, 20.0f);
+        Invoke("RotateCamera", num);
     }
 }

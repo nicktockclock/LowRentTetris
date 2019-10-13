@@ -538,7 +538,7 @@ GameObject:
   - component: {fileID: 554501223}
   m_Layer: 0
   m_Name: Board
-  m_TagString: Untagged
+  m_TagString: Innovation
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -855,7 +855,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1179466103}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9de0b35bf9fb9064a975d60f460a9b9d, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e6c985c4c82f564a958e8b34dc580b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   leftwall: 0
@@ -866,7 +866,6 @@ MonoBehaviour:
   currentheight: 0
   currentwidth: 0
   tile: {fileID: 7794200906992192623, guid: 3d9399b55c3a4fe4b8d9fadc96a3d242, type: 3}
-  obstacle: {fileID: 21300000, guid: f676aaa727ac95c419803cc91f708dc2, type: 3}
   pieces:
   - {fileID: 8722279304181499353, guid: cba2359aa3eb92443bf9dc9bd2b19d1f, type: 3}
   - {fileID: 1742701731806048090, guid: b72e1423f050c3b4487e9e648e39422c, type: 3}
@@ -880,7 +879,6 @@ MonoBehaviour:
   next2: {fileID: 0}
   next3: {fileID: 0}
   board: {fileID: 554501222}
-  map: {fileID: 1710419156}
   red: {fileID: 21300000, guid: f612064a9f245924eb8fa834fd45ca46, type: 3}
   pink: {fileID: 21300000, guid: 8f13fe375812d614e92283c29c9341a7, type: 3}
   blue: {fileID: 21300000, guid: 2ad76d76affd55f4eb2f218c1a210df0, type: 3}
@@ -889,11 +887,14 @@ MonoBehaviour:
   yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
   alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
   tilesprite: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
+  clearanim: {fileID: 8889492178503764055, guid: 6c73e04205bd856429ebb0ac9cbb3a44,
+    type: 3}
   canmove: 0
   gameover: 0
-  finalscore: {fileID: 1196704212}
+  finalscore: {fileID: 0}
   clearsound: {fileID: 844627948}
-  rotatesound: {fileID: 197129914}
+  rotatesound: {fileID: 511734278}
+  changesound: {fileID: 197129914}
 --- !u!4 &1179466105
 Transform:
   m_ObjectHideFlags: 0

@@ -888,6 +888,8 @@ MonoBehaviour:
   yellow: {fileID: 21300000, guid: e92d1902a2626c948bfdb78dd5a00fde, type: 3}
   alsored: {fileID: 21300000, guid: 7ed5fa8d6f84dc442ad1e7c58bffb57c, type: 3}
   tilesprite: {fileID: 21300000, guid: e9ab8dd6868853943ae1740f620bde04, type: 3}
+  clearanim: {fileID: 8889492178503764055, guid: 6c73e04205bd856429ebb0ac9cbb3a44,
+    type: 3}
   canmove: 0
   gameover: 0
   finalscore: {fileID: 1196704212}

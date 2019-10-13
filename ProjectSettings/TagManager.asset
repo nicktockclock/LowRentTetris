@@ -16,6 +16,7 @@ TagManager:
   - Floor
   - Occupied
   - Obstacle
+  - Innovation
   layers:
   - Default
   - TransparentFX

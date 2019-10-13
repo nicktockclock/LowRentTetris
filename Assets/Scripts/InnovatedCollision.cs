@@ -5,17 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class InnovatedCollision : MonoBehaviour
 {
-    //every movement feed back the tiles occupied. on update check if below this tile is the bottom or a taken tile
+    //Every movement feeds back the tiles that are currently occupied by the playerpiece
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (SceneManager.GetActiveScene().name == "InnovatedLevel")
-        {
-            InnovatedGame.currenttiles.Add(collision.gameObject);
-        }
-        else
-        {
-            Setup.currenttiles.Add(collision.gameObject);
-        }
-        
+        Setup.currenttiles.Add(collision.gameObject);   
     }
 }
